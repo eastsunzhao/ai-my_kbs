@@ -23,6 +23,20 @@ prisma/               Prisma schema 与 seed 脚本
 scripts/              smoke test
 ```
 
+
+## 当前可运行状态与依赖清单
+
+当前代码已经包含应用源码、配置、Prisma schema、数据库初始化脚本和 smoke test。要真正启动 Web 应用，还必须先安装 `package.json` 中声明的 npm 依赖，并初始化 SQLite 数据库。
+
+运行所需信息：
+
+- Node.js 20 或更高版本
+- 可访问 npm registry 的网络或可用的内部 npm 镜像
+- `.env` 文件中的 `DATABASE_URL`，本地默认可使用 `.env.example` 提供的 `file:./dev.db`
+- 首次运行前执行 `npm run db:init`，生成 Prisma Client、创建 SQLite 表并写入演示数据
+
+核心运行依赖在 `package.json` 中维护，包括 `next`、`react`、`react-dom`、`prisma` 和 `@prisma/client`；开发检查依赖包括 TypeScript、ESLint、Tailwind CSS、PostCSS、Autoprefixer 和类型声明包。
+
 ## 本地安装
 
 > 需要 Node.js 20+。推荐复制 `.env.example` 为 `.env`，默认使用 `prisma/dev.db`。
