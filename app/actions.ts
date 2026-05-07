@@ -25,6 +25,10 @@ function tagConnections(tagNames: string[]) {
   }));
 }
 
+function shouldReturnHomeAfterMutation() {
+  return process.env.VERCEL === "1" && (process.env.DATABASE_URL ?? "").startsWith("file:");
+}
+
 export async function createNote(formData: FormData) {
   await ensureDatabase();
   const { title, content, tagNames } = readNoteForm(formData);
@@ -41,6 +45,10 @@ export async function createNote(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/notes");
+  if (shouldReturnHomeAfterMutation()) {
+    redirect("/?saved=1");
+  }
+
   redirect(`/notes/${note.id}`);
 }
 
@@ -63,6 +71,10 @@ export async function updateNote(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath(`/notes/${id}`);
+  if (shouldReturnHomeAfterMutation()) {
+    redirect("/?saved=1");
+  }
+
   redirect(`/notes/${id}`);
 }
 

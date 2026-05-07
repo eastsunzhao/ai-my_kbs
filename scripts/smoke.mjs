@@ -28,6 +28,14 @@ for (const token of ["model Note", "model Tag", "provider = \"sqlite\""]) {
   }
 }
 
+
+const noteEditor = readFileSync(join(root, "components/NoteEditor.tsx"), "utf8");
+for (const token of ["type=\"file\"", ".docx", "extractDocxText"]) {
+  if (!noteEditor.includes(token)) {
+    throw new Error(`Note editor upload support is missing ${token}`);
+  }
+}
+
 const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 for (const script of ["dev", "build", "lint", "typecheck", "test", "db:init"]) {
   if (!packageJson.scripts?.[script]) {
