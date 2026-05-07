@@ -131,6 +131,21 @@ npx vercel env add DATABASE_URL production --token "$VERCEL_TOKEN"
 
 如果项目属于团队，还需要使用 Vercel 的 team slug/账号 scope，例如 `--scope your-team-slug`。
 
+
+### `DATABASE_URL` 应该填什么？
+
+当前项目的 Prisma schema 使用 SQLite，因此本地或 Vercel 演示部署可以使用：
+
+```text
+DATABASE_URL=file:./dev.db
+```
+
+但这个值只适合本地开发或 Vercel 演示。SQLite 是文件数据库，Vercel Serverless 运行环境不适合作为长期可写的文件数据库存储；部署后新增/编辑的笔记不应依赖该 SQLite 文件做生产级持久化。
+
+如果要在 Vercel 上长期保存真实笔记，需要先创建一个托管数据库并使用它提供的连接串。Vercel Marketplace 可以创建或连接 Postgres 等数据库，并把凭据注入为项目环境变量。注意：如果改用 Postgres，当前 `prisma/schema.prisma` 里的 datasource provider 也要从 `sqlite` 改为 `postgresql`，并重新执行 Prisma 初始化/迁移；不能只把 Postgres 连接串填进当前 SQLite schema。
+
+我不能直接替你“提供”一个生产 `DATABASE_URL`，因为它包含数据库账号、密码、主机和库名，必须由你的数据库服务商或 Vercel Marketplace 在你的账号下生成。
+
 ### 关于 SQLite 和 Vercel 的说明
 
 SQLite 文件数据库非常适合本地开发和个人离线使用。Vercel 的 Serverless 文件系统不适合保存长期可写数据，因此直接使用 SQLite 部署到 Vercel 更适合演示或只读场景。若要在生产环境长期保存笔记，建议把 Prisma datasource 切换到托管数据库（例如 PostgreSQL、Turso/libSQL 等）。
