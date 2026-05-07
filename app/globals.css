@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+.prose pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.prose code {
+  background: #e2e8f0;
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.3rem;
+}
+
+.prose pre code {
+  background: transparent;
+  padding: 0;
+}
