@@ -1,0 +1,42 @@
+{
+  "name": "ai-my-kbs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A personal knowledge base built with Next.js, TypeScript, Tailwind CSS, Prisma, and SQLite.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && prisma db push && prisma db seed && next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/smoke.mjs",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:init": "prisma generate && prisma db push && npm run db:seed"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.17.1",
+    "next": "^15.5.6",
+    "prisma": "^6.17.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/node": "^24.8.0",
+    "@types/react": "^19.1.16",
+    "@types/react-dom": "^19.1.9",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.37.0",
+    "eslint-config-next": "^15.5.6",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.18",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}
