@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { NoteCard } from "@/components/NoteCard";
 import { prisma } from "@/lib/db";
 import { ensureDatabase } from "@/lib/ensure-db";
+import { RECENT_NOTE_COOKIE, decodeRecentNoteCookie } from "@/lib/recent-note";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +26,7 @@ export default async function Home({ searchParams }: HomeProps) {
       }
     : undefined;
 
-  const [notes, noteCount, tagCount, latestNote] = await Promise.all([
+  const [notes, noteCount, tagCount, latestNote, cookieStore] = await Promise.all([
     prisma.note.findMany({
       where,
       orderBy: { updatedAt: "desc" },
@@ -32,14 +34,29 @@ export default async function Home({ searchParams }: HomeProps) {
     }),
     prisma.note.count(),
     prisma.tag.count(),
-    prisma.note.findFirst({ orderBy: { updatedAt: "desc" } })
+    prisma.note.findFirst({ orderBy: { updatedAt: "desc" } }),
+    cookies()
   ]);
+  const recentNote = saved ? decodeRecentNoteCookie(cookieStore.get(RECENT_NOTE_COOKIE)?.value) : null;
+  const recentNoteCard = recentNote
+    ? {
+        id: recentNote.id,
+        title: recentNote.title,
+        content: recentNote.content,
+        updatedAt: new Date(recentNote.updatedAt),
+        tags: recentNote.tags.map((tag) => ({ id: `${recentNote.id}-${tag.name}`, name: tag.name }))
+      }
+    : null;
+  const shouldShowRecentNote = Boolean(recentNoteCard && !notes.some((note) => note.id === recentNoteCard.id));
+  const displayedNotes = shouldShowRecentNote && recentNoteCard ? [recentNoteCard, ...notes] : notes;
+  const displayNoteCount = shouldShowRecentNote ? noteCount + 1 : noteCount;
+  const displayLatestNote = shouldShowRecentNote && recentNoteCard ? recentNoteCard : latestNote;
 
   return (
     <div className="space-y-8">
       {saved ? (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800 shadow-sm">
-          笔记已保存。Vercel 演示环境使用临时 SQLite 存储，如果页面刷新到新的 Serverless 实例，演示数据可能会重置。
+          笔记已保存，首页列表已更新。{shouldShowRecentNote ? "如果当前 Vercel 实例暂时读不到临时 SQLite 文件，本页会先展示刚保存的笔记。" : ""}
         </div>
       ) : null}
       <section className="rounded-3xl bg-gradient-to-br from-indigo-900 via-slate-900 to-sky-800 p-8 text-white shadow-sm shadow-indigo-200">
@@ -58,7 +75,7 @@ export default async function Home({ searchParams }: HomeProps) {
       <section className="grid gap-4 md:grid-cols-3">
         <div className="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm shadow-indigo-100/60">
           <p className="text-sm text-slate-500">笔记总数</p>
-          <p className="mt-2 text-3xl font-bold">{noteCount}</p>
+          <p className="mt-2 text-3xl font-bold">{displayNoteCount}</p>
         </div>
         <div className="rounded-2xl border border-sky-100 bg-white p-5 shadow-sm shadow-sky-100/60">
           <p className="text-sm text-slate-500">标签总数</p>
@@ -66,7 +83,7 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
         <div className="rounded-2xl border border-amber-100 bg-white p-5 shadow-sm shadow-amber-100/60">
           <p className="text-sm text-slate-500">最近更新</p>
-          <p className="mt-2 truncate text-xl font-semibold">{latestNote?.title ?? "暂无笔记"}</p>
+          <p className="mt-2 truncate text-xl font-semibold">{displayLatestNote?.title ?? "暂无笔记"}</p>
         </div>
       </section>
 
@@ -92,11 +109,11 @@ export default async function Home({ searchParams }: HomeProps) {
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-2xl font-bold">{query ? `搜索结果：${query}` : "全部笔记"}</h2>
-          <span className="text-sm text-slate-500">{notes.length} 条</span>
+          <span className="text-sm text-slate-500">{displayedNotes.length} 条</span>
         </div>
-        {notes.length ? (
+        {displayedNotes.length ? (
           <div className="grid gap-4 md:grid-cols-2">
-            {notes.map((note) => (
+            {displayedNotes.map((note) => (
               <NoteCard key={note.id} note={note} />
             ))}
           </div>

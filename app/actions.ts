@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { parseTags } from "@/lib/tags";
 import { ensureDatabase } from "@/lib/ensure-db";
+import { RECENT_NOTE_COOKIE, encodeRecentNoteCookie, toRecentNoteCookie } from "@/lib/recent-note";
 
 function readNoteForm(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
@@ -29,6 +31,22 @@ function shouldReturnHomeAfterMutation() {
   return process.env.VERCEL === "1" && (process.env.DATABASE_URL ?? "").startsWith("file:");
 }
 
+async function rememberRecentNote(note: {
+  id: string;
+  title: string;
+  content: string;
+  updatedAt: Date;
+  tags: { name: string }[];
+}) {
+  const cookieStore = await cookies();
+  cookieStore.set(RECENT_NOTE_COOKIE, encodeRecentNoteCookie(toRecentNoteCookie(note)), {
+    httpOnly: true,
+    maxAge: 60 * 30,
+    path: "/",
+    sameSite: "lax"
+  });
+}
+
 export async function createNote(formData: FormData) {
   await ensureDatabase();
   const { title, content, tagNames } = readNoteForm(formData);
@@ -40,9 +58,11 @@ export async function createNote(formData: FormData) {
       tags: {
         connectOrCreate: tagConnections(tagNames)
       }
-    }
+    },
+    include: { tags: { orderBy: { name: "asc" } } }
   });
 
+  await rememberRecentNote(note);
   revalidatePath("/");
   revalidatePath("/notes");
   if (shouldReturnHomeAfterMutation()) {
@@ -57,7 +77,7 @@ export async function updateNote(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const { title, content, tagNames } = readNoteForm(formData);
 
-  await prisma.note.update({
+  const note = await prisma.note.update({
     where: { id },
     data: {
       title,
@@ -66,9 +86,11 @@ export async function updateNote(formData: FormData) {
         set: [],
         connectOrCreate: tagConnections(tagNames)
       }
-    }
+    },
+    include: { tags: { orderBy: { name: "asc" } } }
   });
 
+  await rememberRecentNote(note);
   revalidatePath("/");
   revalidatePath(`/notes/${id}`);
   if (shouldReturnHomeAfterMutation()) {
@@ -83,6 +105,8 @@ export async function deleteNote(formData: FormData) {
   const id = String(formData.get("id") ?? "");
 
   await prisma.note.delete({ where: { id } });
+  const cookieStore = await cookies();
+  cookieStore.delete(RECENT_NOTE_COOKIE);
 
   revalidatePath("/");
   redirect("/");
