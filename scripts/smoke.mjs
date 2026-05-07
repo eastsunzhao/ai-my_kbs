@@ -10,8 +10,13 @@ const requiredFiles = [
   "components/NoteEditor.tsx",
   "components/MarkdownPreview.tsx",
   "lib/markdown.ts",
+  "lib/ensure-db.ts",
   "prisma/schema.prisma",
-  "prisma/seed.ts"
+  "prisma/seed.ts",
+  "docker-compose.yml",
+  "Dockerfile",
+  "docker/mysql/init/01-create-my-kbs-user.sql",
+  "scripts/deploy-local-docker.sh"
 ];
 
 for (const file of requiredFiles) {
@@ -21,17 +26,38 @@ for (const file of requiredFiles) {
 }
 
 const schema = readFileSync(join(root, "prisma/schema.prisma"), "utf8");
-for (const token of ["model Note", "model Tag", "provider = \"sqlite\""]) {
+for (const token of ["model Note", "model Tag", "provider = \"mysql\""]) {
   if (!schema.includes(token)) {
     throw new Error(`Prisma schema does not include ${token}`);
   }
 }
 
+const noteEditor = readFileSync(join(root, "components/NoteEditor.tsx"), "utf8");
+for (const token of ["type=\"file\"", ".docx", "extractDocxText"]) {
+  if (!noteEditor.includes(token)) {
+    throw new Error(`Note editor upload support is missing ${token}`);
+  }
+}
+
+const compose = readFileSync(join(root, "docker-compose.yml"), "utf8");
+for (const token of ["mysql:8.0.25", "my_kbs", "admin123", "mysql_data"]) {
+  if (!compose.includes(token)) {
+    throw new Error(`Docker Compose MySQL setup is missing ${token}`);
+  }
+}
+
 const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-for (const script of ["dev", "build", "lint", "typecheck", "test", "db:init"]) {
+for (const script of ["dev", "build", "lint", "typecheck", "test", "db:init", "docker:deploy"]) {
   if (!packageJson.scripts?.[script]) {
     throw new Error(`Missing npm script: ${script}`);
   }
 }
 
-console.log("Smoke test passed: project structure, Prisma schema, and npm scripts are present.");
+const deployScript = readFileSync(join(root, "scripts/deploy-local-docker.sh"), "utf8");
+for (const token of ["docker compose", "up -d --build", "docker compose -f", "http://localhost:3000"]) {
+  if (!deployScript.includes(token)) {
+    throw new Error(`Local Docker deploy script is missing ${token}`);
+  }
+}
+
+console.log("Smoke test passed: project structure, Prisma schema, Docker setup, and npm scripts are present.");
