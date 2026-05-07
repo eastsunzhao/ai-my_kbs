@@ -1,26 +1,13 @@
 import Link from "next/link";
-<<<<<<< HEAD
-import { NoteCard } from "@/components/NoteCard";
-import { prisma } from "@/lib/db";
-=======
 import { cookies } from "next/headers";
 import { NoteCard } from "@/components/NoteCard";
 import { prisma } from "@/lib/db";
 import { ensureDatabase } from "@/lib/ensure-db";
 import { RECENT_NOTE_COOKIE, decodeRecentNoteCookie } from "@/lib/recent-note";
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
 
 export const dynamic = "force-dynamic";
 
 type HomeProps = {
-<<<<<<< HEAD
-  searchParams?: Promise<{ q?: string }>;
-};
-
-export default async function Home({ searchParams }: HomeProps) {
-  const params = await searchParams;
-  const query = params?.q?.trim() ?? "";
-=======
   searchParams?: Promise<{ q?: string; saved?: string }>;
 };
 
@@ -29,7 +16,6 @@ export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
   const query = params?.q?.trim() ?? "";
   const saved = params?.saved === "1";
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
   const where = query
     ? {
         OR: [
@@ -40,11 +26,7 @@ export default async function Home({ searchParams }: HomeProps) {
       }
     : undefined;
 
-<<<<<<< HEAD
-  const [notes, noteCount, tagCount, latestNote] = await Promise.all([
-=======
   const [notes, noteCount, tagCount, latestNote, cookieStore] = await Promise.all([
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
     prisma.note.findMany({
       where,
       orderBy: { updatedAt: "desc" },
@@ -52,14 +34,6 @@ export default async function Home({ searchParams }: HomeProps) {
     }),
     prisma.note.count(),
     prisma.tag.count(),
-<<<<<<< HEAD
-    prisma.note.findFirst({ orderBy: { updatedAt: "desc" } })
-  ]);
-
-  return (
-    <div className="space-y-8">
-      <section className="rounded-3xl bg-gradient-to-br from-slate-900 to-slate-700 p-8 text-white shadow-sm">
-=======
     prisma.note.findFirst({ orderBy: { updatedAt: "desc" } }),
     cookies()
   ]);
@@ -86,7 +60,6 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
       ) : null}
       <section className="rounded-3xl bg-gradient-to-br from-indigo-900 via-slate-900 to-sky-800 p-8 text-white shadow-sm shadow-indigo-200">
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-300">Knowledge Base</p>
@@ -100,23 +73,6 @@ export default async function Home({ searchParams }: HomeProps) {
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-<<<<<<< HEAD
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">笔记总数</p>
-          <p className="mt-2 text-3xl font-bold">{noteCount}</p>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">标签总数</p>
-          <p className="mt-2 text-3xl font-bold">{tagCount}</p>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">最近更新</p>
-          <p className="mt-2 truncate text-xl font-semibold">{latestNote?.title ?? "暂无笔记"}</p>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-=======
         <div className="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm shadow-indigo-100/60">
           <p className="text-sm text-slate-500">笔记总数</p>
           <p className="mt-2 text-3xl font-bold">{displayNoteCount}</p>
@@ -132,7 +88,6 @@ export default async function Home({ searchParams }: HomeProps) {
       </section>
 
       <section className="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm shadow-indigo-100/60">
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
         <form className="flex flex-col gap-3 sm:flex-row" action="/">
           <input
             className="min-h-12 flex-1 rounded-xl border border-slate-300 px-4 outline-none ring-ink/10 focus:ring-4"
@@ -140,11 +95,7 @@ export default async function Home({ searchParams }: HomeProps) {
             defaultValue={query}
             placeholder="搜索标题、正文或标签..."
           />
-<<<<<<< HEAD
-          <button className="rounded-xl bg-ink px-5 py-3 font-semibold text-white hover:bg-slate-700" type="submit">
-=======
           <button className="rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700" type="submit">
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
             搜索
           </button>
           {query ? (
@@ -158,19 +109,11 @@ export default async function Home({ searchParams }: HomeProps) {
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-2xl font-bold">{query ? `搜索结果：${query}` : "全部笔记"}</h2>
-<<<<<<< HEAD
-          <span className="text-sm text-slate-500">{notes.length} 条</span>
-        </div>
-        {notes.length ? (
-          <div className="grid gap-4 md:grid-cols-2">
-            {notes.map((note) => (
-=======
           <span className="text-sm text-slate-500">{displayedNotes.length} 条</span>
         </div>
         {displayedNotes.length ? (
           <div className="grid gap-4 md:grid-cols-2">
             {displayedNotes.map((note) => (
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
               <NoteCard key={note.id} note={note} />
             ))}
           </div>

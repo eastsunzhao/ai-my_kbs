@@ -3,24 +3,14 @@ generator client {
 }
 
 datasource db {
-<<<<<<< HEAD
-  provider = "sqlite"
-=======
   provider = "mysql"
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
   url      = env("DATABASE_URL")
 }
 
 model Note {
-<<<<<<< HEAD
-  id        String   @id @default(cuid())
-  title     String
-  content   String
-=======
   id        String   @id @default(cuid()) @db.VarChar(191)
   title     String   @db.VarChar(255)
   content   String   @db.Text
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   tags      Tag[]    @relation("NoteTags")
@@ -30,12 +20,7 @@ model Note {
 }
 
 model Tag {
-<<<<<<< HEAD
-  id    String @id @default(cuid())
-  name  String @unique
-=======
   id    String @id @default(cuid()) @db.VarChar(191)
   name  String @unique @db.VarChar(191)
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
   notes Note[] @relation("NoteTags")
 }

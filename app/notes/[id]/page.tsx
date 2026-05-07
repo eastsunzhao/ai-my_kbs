@@ -1,17 +1,11 @@
 import Link from "next/link";
-<<<<<<< HEAD
-=======
 import { cookies } from "next/headers";
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
 import { notFound } from "next/navigation";
 import { deleteNote } from "@/app/actions";
 import { MarkdownPreview } from "@/components/MarkdownPreview";
 import { prisma } from "@/lib/db";
-<<<<<<< HEAD
-=======
 import { ensureDatabase } from "@/lib/ensure-db";
 import { RECENT_NOTE_COOKIE, decodeRecentNoteCookie } from "@/lib/recent-note";
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
 
 export const dynamic = "force-dynamic";
 
@@ -20,13 +14,6 @@ type NotePageProps = {
 };
 
 export default async function NotePage({ params }: NotePageProps) {
-<<<<<<< HEAD
-  const { id } = await params;
-  const note = await prisma.note.findUnique({
-    where: { id },
-    include: { tags: { orderBy: { name: "asc" } } }
-  });
-=======
   await ensureDatabase();
   const { id } = await params;
   const [dbNote, cookieStore] = await Promise.all([
@@ -49,7 +36,6 @@ export default async function NotePage({ params }: NotePageProps) {
       : null;
   const note = dbNote ?? recoveredNote;
   const isRecoveredNote = !dbNote && Boolean(recoveredNote);
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
 
   if (!note) {
     notFound();
@@ -57,8 +43,6 @@ export default async function NotePage({ params }: NotePageProps) {
 
   return (
     <article className="space-y-6">
-<<<<<<< HEAD
-=======
       <div className="flex items-center justify-between">
         <Link className="rounded-xl border border-indigo-200 bg-white px-4 py-2 font-semibold text-indigo-700 shadow-sm hover:bg-indigo-50" href="/">
           ← 返回首页
@@ -69,7 +53,6 @@ export default async function NotePage({ params }: NotePageProps) {
           当前详情来自刚保存的浏览器回执。Vercel 临时 SQLite 实例同步后，可在首页列表中继续查看完整数据库记录。
         </div>
       ) : null}
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
@@ -83,18 +66,6 @@ export default async function NotePage({ params }: NotePageProps) {
               ))}
             </div>
           </div>
-<<<<<<< HEAD
-          <div className="flex gap-2">
-            <Link className="rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50" href={`/notes/${note.id}/edit`}>
-              编辑
-            </Link>
-            <form action={deleteNote}>
-              <input type="hidden" name="id" value={note.id} />
-              <button className="rounded-xl bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700" type="submit">
-                删除
-              </button>
-            </form>
-=======
           <div className="flex flex-wrap gap-2">
             <Link className="rounded-xl border border-indigo-200 px-4 py-2 font-semibold text-indigo-700 hover:bg-indigo-50" href="/">
               返回列表
@@ -112,7 +83,6 @@ export default async function NotePage({ params }: NotePageProps) {
                 </form>
               </>
             ) : null}
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
           </div>
         </div>
       </div>

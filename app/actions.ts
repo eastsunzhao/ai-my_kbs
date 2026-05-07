@@ -1,18 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-<<<<<<< HEAD
-import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { parseTags } from "@/lib/tags";
-=======
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { parseTags } from "@/lib/tags";
 import { ensureDatabase } from "@/lib/ensure-db";
 import { RECENT_NOTE_COOKIE, encodeRecentNoteCookie, toRecentNoteCookie } from "@/lib/recent-note";
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
 
 function readNoteForm(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
@@ -33,9 +27,6 @@ function tagConnections(tagNames: string[]) {
   }));
 }
 
-<<<<<<< HEAD
-export async function createNote(formData: FormData) {
-=======
 function shouldReturnHomeAfterMutation() {
   return process.env.VERCEL === "1" && (process.env.DATABASE_URL ?? "").startsWith("file:");
 }
@@ -58,7 +49,6 @@ async function rememberRecentNote(note: {
 
 export async function createNote(formData: FormData) {
   await ensureDatabase();
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
   const { title, content, tagNames } = readNoteForm(formData);
 
   const note = await prisma.note.create({
@@ -68,13 +58,6 @@ export async function createNote(formData: FormData) {
       tags: {
         connectOrCreate: tagConnections(tagNames)
       }
-<<<<<<< HEAD
-    }
-  });
-
-  revalidatePath("/");
-  revalidatePath("/notes");
-=======
     },
     include: { tags: { orderBy: { name: "asc" } } }
   });
@@ -86,23 +69,15 @@ export async function createNote(formData: FormData) {
     redirect("/?saved=1");
   }
 
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
   redirect(`/notes/${note.id}`);
 }
 
 export async function updateNote(formData: FormData) {
-<<<<<<< HEAD
-  const id = String(formData.get("id") ?? "");
-  const { title, content, tagNames } = readNoteForm(formData);
-
-  await prisma.note.update({
-=======
   await ensureDatabase();
   const id = String(formData.get("id") ?? "");
   const { title, content, tagNames } = readNoteForm(formData);
 
   const note = await prisma.note.update({
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
     where: { id },
     data: {
       title,
@@ -111,13 +86,6 @@ export async function updateNote(formData: FormData) {
         set: [],
         connectOrCreate: tagConnections(tagNames)
       }
-<<<<<<< HEAD
-    }
-  });
-
-  revalidatePath("/");
-  revalidatePath(`/notes/${id}`);
-=======
     },
     include: { tags: { orderBy: { name: "asc" } } }
   });
@@ -128,24 +96,16 @@ export async function updateNote(formData: FormData) {
   if (shouldReturnHomeAfterMutation()) {
     redirect("/?saved=1");
   }
-
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
   redirect(`/notes/${id}`);
 }
 
 export async function deleteNote(formData: FormData) {
-<<<<<<< HEAD
-  const id = String(formData.get("id") ?? "");
-
-  await prisma.note.delete({ where: { id } });
-=======
   await ensureDatabase();
   const id = String(formData.get("id") ?? "");
 
   await prisma.note.delete({ where: { id } });
   const cookieStore = await cookies();
   cookieStore.delete(RECENT_NOTE_COOKIE);
->>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
 
   revalidatePath("/");
   redirect("/");
