@@ -2,10 +2,10 @@
   "name": "ai-my-kbs",
   "version": "0.1.0",
   "private": true,
-  "description": "A personal knowledge base built with Next.js, TypeScript, Tailwind CSS, Prisma, and SQLite.",
+  "description": "A personal knowledge base built with Next.js, TypeScript, Tailwind CSS, Prisma, and MySQL.",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma db push && prisma db seed && next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

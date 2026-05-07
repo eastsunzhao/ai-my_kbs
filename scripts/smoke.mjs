@@ -12,7 +12,9 @@ const requiredFiles = [
   "lib/markdown.ts",
   "lib/ensure-db.ts",
   "prisma/schema.prisma",
-  "prisma/seed.ts"
+  "prisma/seed.ts",
+  "docker-compose.yml",
+  "docker/mysql/init/01-create-my-kbs-user.sql"
 ];
 
 for (const file of requiredFiles) {
@@ -22,7 +24,7 @@ for (const file of requiredFiles) {
 }
 
 const schema = readFileSync(join(root, "prisma/schema.prisma"), "utf8");
-for (const token of ["model Note", "model Tag", "provider = \"sqlite\""]) {
+for (const token of ["model Note", "model Tag", "provider = \"mysql\""]) {
   if (!schema.includes(token)) {
     throw new Error(`Prisma schema does not include ${token}`);
   }
@@ -33,6 +35,13 @@ const noteEditor = readFileSync(join(root, "components/NoteEditor.tsx"), "utf8")
 for (const token of ["type=\"file\"", ".docx", "extractDocxText"]) {
   if (!noteEditor.includes(token)) {
     throw new Error(`Note editor upload support is missing ${token}`);
+  }
+}
+
+const compose = readFileSync(join(root, "docker-compose.yml"), "utf8");
+for (const token of ["mysql:8.0.25", "my_kbs", "admin123", "mysql_data"]) {
+  if (!compose.includes(token)) {
+    throw new Error(`Docker Compose MySQL setup is missing ${token}`);
   }
 }
 
