@@ -31,12 +31,18 @@ function decodeXmlEntities(value: string) {
     .replaceAll("&amp;", "&");
 }
 
+function copyToArrayBuffer(data: Uint8Array) {
+  const buffer = new ArrayBuffer(data.byteLength);
+  new Uint8Array(buffer).set(data);
+  return buffer;
+}
+
 async function inflateRaw(data: Uint8Array) {
   if (!("DecompressionStream" in globalThis)) {
     throw new Error("当前浏览器不支持解析 docx 压缩内容，请先转换为 Markdown 或 TXT 后上传。");
   }
 
-  const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw" as CompressionFormat));
+  const stream = new Blob([copyToArrayBuffer(data)]).stream().pipeThrough(new DecompressionStream("deflate-raw" as CompressionFormat));
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
