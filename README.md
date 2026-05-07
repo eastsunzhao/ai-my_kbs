@@ -22,8 +22,18 @@ components/           笔记卡片、编辑器、Markdown 预览组件
 docker/mysql/init/    MySQL 初始化 SQL
 lib/                  Prisma 客户端、Markdown 渲染、标签解析工具
 prisma/               Prisma schema 与 seed 脚本
-scripts/              smoke test
+scripts/              smoke test 与本机 Docker 部署脚本
 ```
+
+## Docker 配置文件在哪里？
+
+本机 Docker 部署相关文件都在项目根目录和 `docker/`、`scripts/` 目录下：
+
+- `docker-compose.yml`：Docker Compose 主配置，定义 MySQL 8.0.25、Web 应用、端口、环境变量、健康检查和持久化数据卷。
+- `Dockerfile`：Web 应用镜像构建配置，负责安装依赖、执行 Next.js 构建并暴露 `3000` 端口。
+- `.dockerignore`：Docker build 上下文忽略规则，避免把 `node_modules`、`.next`、`.env` 等本地文件打进镜像。
+- `docker/mysql/init/01-create-my-kbs-user.sql`：MySQL 首次初始化 SQL，创建 `my_kbs` 数据库和 `my_kbs` 用户。
+- `scripts/deploy-local-docker.sh`：一键部署到本机 Docker 的完整执行脚本。
 
 ## 需要什么权限、什么信息？
 
@@ -52,8 +62,36 @@ scripts/              smoke test
 
 这个方式会同时启动 MySQL 和 Web 应用。MySQL 数据存储在 Docker volume `mysql_data` 中，容器重启后数据仍会保留。
 
+### 一键脚本
+
+推荐直接执行仓库内置脚本：
+
+```bash
+bash scripts/deploy-local-docker.sh
+```
+
+或通过 npm 脚本执行：
+
+```bash
+npm run docker:deploy
+```
+
+脚本会自动完成以下步骤：
+
+1. 检查 `docker` 命令是否存在。
+2. 检查 `docker compose` 是否可用。
+3. 使用 `docker-compose.yml` 执行 `docker compose up -d --build`。
+4. 输出容器状态。
+5. 轮询 `http://localhost:3000`，确认应用是否启动成功。
+
+### 手动执行完整命令
+
+如果你不想使用脚本，也可以手动运行：
+
 ```bash
 docker compose up -d --build
+docker compose ps
+docker compose logs -f app
 ```
 
 启动后访问：
@@ -62,17 +100,10 @@ docker compose up -d --build
 http://localhost:3000
 ```
 
-查看容器状态：
-
-```bash
-docker compose ps
-```
-
-查看日志：
+查看 MySQL 日志：
 
 ```bash
 docker compose logs -f mysql
-docker compose logs -f app
 ```
 
 停止服务但保留数据：
@@ -141,9 +172,10 @@ DATABASE_URL="mysql://my_kbs:admin123@localhost:3306/my_kbs"
 npm run lint       # 运行 Next.js/ESLint 检查
 npm run typecheck  # 运行 TypeScript 类型检查
 npm run test       # 运行 smoke test
-npm run build      # 生成 Prisma Client 并构建 Next.js 应用
-npm run db:init    # 初始化 MySQL 数据库表并写入演示笔记
-npm run db:seed    # 重新写入/更新演示笔记
+npm run build          # 生成 Prisma Client 并构建 Next.js 应用
+npm run db:init        # 初始化 MySQL 数据库表并写入演示笔记
+npm run db:seed        # 重新写入/更新演示笔记
+npm run docker:deploy  # 一键部署到本机 Docker
 ```
 
 ## 部署到 Vercel

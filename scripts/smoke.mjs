@@ -14,7 +14,9 @@ const requiredFiles = [
   "prisma/schema.prisma",
   "prisma/seed.ts",
   "docker-compose.yml",
-  "docker/mysql/init/01-create-my-kbs-user.sql"
+  "Dockerfile",
+  "docker/mysql/init/01-create-my-kbs-user.sql",
+  "scripts/deploy-local-docker.sh"
 ];
 
 for (const file of requiredFiles) {
@@ -46,10 +48,17 @@ for (const token of ["mysql:8.0.25", "my_kbs", "admin123", "mysql_data"]) {
 }
 
 const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-for (const script of ["dev", "build", "lint", "typecheck", "test", "db:init"]) {
+for (const script of ["dev", "build", "lint", "typecheck", "test", "db:init", "docker:deploy"]) {
   if (!packageJson.scripts?.[script]) {
     throw new Error(`Missing npm script: ${script}`);
   }
 }
 
-console.log("Smoke test passed: project structure, Prisma schema, and npm scripts are present.");
+const deployScript = readFileSync(join(root, "scripts/deploy-local-docker.sh"), "utf8");
+for (const token of ["docker compose", "up -d --build", "docker compose -f", "http://localhost:3000"]) {
+  if (!deployScript.includes(token)) {
+    throw new Error(`Local Docker deploy script is missing ${token}`);
+  }
+}
+
+console.log("Smoke test passed: project structure, Prisma schema, Docker setup, and npm scripts are present.");
