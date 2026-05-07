@@ -146,7 +146,7 @@ Vercel 演示部署建议使用：
 DATABASE_URL=file:/tmp/ai-my-kbs.db
 ```
 
-应用会在 SQLite 数据库启动时自动创建所需表和演示数据，避免 Vercel Serverless 运行时报 `Error code 14: Unable to open the database file`。
+应用会在每次 SQLite 查询前检查 `Note`、`Tag` 和 `_NoteTags` 表是否存在；如果 Vercel 冷启动拿到的是新的 `/tmp` 数据库，会自动创建所需表和演示数据，避免 Vercel Serverless 运行时报 `Error code 14: Unable to open the database file` 或 `P2021: The table main.Note does not exist in the current database`。
 
 但这些 SQLite 值只适合本地开发或 Vercel 演示。SQLite 是文件数据库，Vercel Serverless 运行环境不适合作为长期可写的文件数据库存储；部署后新增/编辑的笔记不应依赖该 SQLite 文件做生产级持久化。
 

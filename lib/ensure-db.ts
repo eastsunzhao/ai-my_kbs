@@ -1,13 +1,27 @@
 import { prisma } from "@/lib/db";
 
-const sqliteUrl = process.env.DATABASE_URL ?? "";
-const shouldEnsureSqliteSchema = sqliteUrl.startsWith("file:");
-
 const demoNote = {
   id: "seed-welcome-note",
   title: "欢迎使用个人知识库",
   content: `# 欢迎使用个人知识库\n\n这是一个最小可用的知识库系统。\n\n- 使用 Markdown 记录想法\n- 用标签整理主题\n- 通过搜索快速找到笔记\n\n> 现在就创建第一条自己的笔记吧。`
 };
+
+type SqliteTableRow = {
+  name: string;
+};
+
+function shouldEnsureSqliteSchema() {
+  return (process.env.DATABASE_URL ?? "").startsWith("file:");
+}
+
+async function hasRequiredSqliteTables() {
+  const rows = await prisma.$queryRawUnsafe<SqliteTableRow[]>(
+    `SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('Note', 'Tag', '_NoteTags');`
+  );
+  const tableNames = new Set(rows.map((row: SqliteTableRow) => row.name));
+
+  return tableNames.has("Note") && tableNames.has("Tag") && tableNames.has("_NoteTags");
+}
 
 async function createSqliteSchema() {
   await prisma.$executeRawUnsafe(`
@@ -61,11 +75,27 @@ async function seedDemoNote() {
 
 const globalForEnsure = globalThis as unknown as { ensureDatabasePromise?: Promise<void> };
 
+async function createAndSeedSqliteSchema() {
+  await createSqliteSchema();
+  await seedDemoNote();
+}
+
 export async function ensureDatabase() {
-  if (!shouldEnsureSqliteSchema) {
+  if (!shouldEnsureSqliteSchema()) {
     return;
   }
 
-  globalForEnsure.ensureDatabasePromise ??= createSqliteSchema().then(seedDemoNote);
+  if (await hasRequiredSqliteTables()) {
+    return;
+  }
+
+  globalForEnsure.ensureDatabasePromise ??= createAndSeedSqliteSchema().finally(() => {
+    globalForEnsure.ensureDatabasePromise = undefined;
+  });
+
   await globalForEnsure.ensureDatabasePromise;
+
+  if (!(await hasRequiredSqliteTables())) {
+    throw new Error("SQLite schema initialization failed: required tables were not created.");
+  }
 }
