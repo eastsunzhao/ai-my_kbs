@@ -97,16 +97,39 @@ npm run db:seed    # 重新写入/更新演示笔记
 
 ## 部署到 Vercel
 
-1. 将仓库推送到 GitHub/GitLab/Bitbucket。
+Vercel 支持通过 Git 集成、CLI、Deploy Hooks 或 REST API 创建部署。最省心的方式是把仓库导入 Vercel 并让每次 push 自动触发部署；如果要由命令行部署，需要 Vercel CLI 和具备部署权限的 `VERCEL_TOKEN`。仅提供 Vercel 用户 ID 不能完成部署，因为用户 ID 不能用于认证或授权。
+
+### 方式 A：Git 导入部署（推荐）
+
+1. 将仓库推送到 GitHub/GitLab/Bitbucket/Azure DevOps。
 2. 在 Vercel 新建项目并导入仓库。
-3. 在 Vercel 环境变量中配置：
+3. 在 Vercel 项目环境变量中配置：
 
    ```text
    DATABASE_URL=file:./dev.db
    ```
 
 4. Build Command 使用默认 `npm run build`。
-5. 部署完成后访问 Vercel 域名。
+5. 部署完成后访问 Vercel 生成的域名。
+
+### 方式 B：Vercel CLI 部署
+
+在已安装依赖、已登录或已提供 token 的环境中运行：
+
+```bash
+npm install
+npm run db:init
+npx vercel --yes --token "$VERCEL_TOKEN"
+npx vercel --prod --yes --token "$VERCEL_TOKEN"
+```
+
+如需先在 Vercel 项目中写入环境变量，可使用：
+
+```bash
+npx vercel env add DATABASE_URL production --token "$VERCEL_TOKEN"
+```
+
+如果项目属于团队，还需要使用 Vercel 的 team slug/账号 scope，例如 `--scope your-team-slug`。
 
 ### 关于 SQLite 和 Vercel 的说明
 
