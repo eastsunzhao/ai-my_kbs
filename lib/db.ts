@@ -1,5 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 
+if (process.env.VERCEL === "1" && (!process.env.DATABASE_URL || process.env.DATABASE_URL === "file:./dev.db")) {
+  process.env.DATABASE_URL = "file:/tmp/ai-my-kbs.db";
+}
+
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 export const prisma =

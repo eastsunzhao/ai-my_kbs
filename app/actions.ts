@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { parseTags } from "@/lib/tags";
+import { ensureDatabase } from "@/lib/ensure-db";
 
 function readNoteForm(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
@@ -25,6 +26,7 @@ function tagConnections(tagNames: string[]) {
 }
 
 export async function createNote(formData: FormData) {
+  await ensureDatabase();
   const { title, content, tagNames } = readNoteForm(formData);
 
   const note = await prisma.note.create({
@@ -43,6 +45,7 @@ export async function createNote(formData: FormData) {
 }
 
 export async function updateNote(formData: FormData) {
+  await ensureDatabase();
   const id = String(formData.get("id") ?? "");
   const { title, content, tagNames } = readNoteForm(formData);
 
@@ -64,6 +67,7 @@ export async function updateNote(formData: FormData) {
 }
 
 export async function deleteNote(formData: FormData) {
+  await ensureDatabase();
   const id = String(formData.get("id") ?? "");
 
   await prisma.note.delete({ where: { id } });

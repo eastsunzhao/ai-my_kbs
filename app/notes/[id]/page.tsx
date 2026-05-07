@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { deleteNote } from "@/app/actions";
 import { MarkdownPreview } from "@/components/MarkdownPreview";
 import { prisma } from "@/lib/db";
+import { ensureDatabase } from "@/lib/ensure-db";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ type NotePageProps = {
 };
 
 export default async function NotePage({ params }: NotePageProps) {
+  await ensureDatabase();
   const { id } = await params;
   const note = await prisma.note.findUnique({
     where: { id },

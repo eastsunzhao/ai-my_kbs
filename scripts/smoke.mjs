@@ -10,6 +10,7 @@ const requiredFiles = [
   "components/NoteEditor.tsx",
   "components/MarkdownPreview.tsx",
   "lib/markdown.ts",
+  "lib/ensure-db.ts",
   "prisma/schema.prisma",
   "prisma/seed.ts"
 ];

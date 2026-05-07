@@ -106,7 +106,7 @@ Vercel 支持通过 Git 集成、CLI、Deploy Hooks 或 REST API 创建部署。
 3. 在 Vercel 项目环境变量中配置：
 
    ```text
-   DATABASE_URL=file:./dev.db
+   DATABASE_URL=file:/tmp/ai-my-kbs.db
    ```
 
 4. Build Command 使用默认 `npm run build`。
@@ -140,7 +140,15 @@ npx vercel env add DATABASE_URL production --token "$VERCEL_TOKEN"
 DATABASE_URL=file:./dev.db
 ```
 
-但这个值只适合本地开发或 Vercel 演示。SQLite 是文件数据库，Vercel Serverless 运行环境不适合作为长期可写的文件数据库存储；部署后新增/编辑的笔记不应依赖该 SQLite 文件做生产级持久化。
+Vercel 演示部署建议使用：
+
+```text
+DATABASE_URL=file:/tmp/ai-my-kbs.db
+```
+
+应用会在 SQLite 数据库启动时自动创建所需表和演示数据，避免 Vercel Serverless 运行时报 `Error code 14: Unable to open the database file`。
+
+但这些 SQLite 值只适合本地开发或 Vercel 演示。SQLite 是文件数据库，Vercel Serverless 运行环境不适合作为长期可写的文件数据库存储；部署后新增/编辑的笔记不应依赖该 SQLite 文件做生产级持久化。
 
 如果要在 Vercel 上长期保存真实笔记，需要先创建一个托管数据库并使用它提供的连接串。Vercel Marketplace 可以创建或连接 Postgres 等数据库，并把凭据注入为项目环境变量。注意：如果改用 Postgres，当前 `prisma/schema.prisma` 里的 datasource provider 也要从 `sqlite` 改为 `postgresql`，并重新执行 Prisma 初始化/迁移；不能只把 Postgres 连接串填进当前 SQLite schema。
 

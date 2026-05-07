@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { NoteCard } from "@/components/NoteCard";
 import { prisma } from "@/lib/db";
+import { ensureDatabase } from "@/lib/ensure-db";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,7 @@ type HomeProps = {
 };
 
 export default async function Home({ searchParams }: HomeProps) {
+  await ensureDatabase();
   const params = await searchParams;
   const query = params?.q?.trim() ?? "";
   const where = query
