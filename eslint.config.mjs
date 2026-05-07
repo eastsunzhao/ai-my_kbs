@@ -7,6 +7,10 @@ const __dirname = dirname(__filename);
 const compat = new FlatCompat({ baseDirectory: __dirname });
 
 const eslintConfig = [
+<<<<<<< HEAD
+=======
+  { ignores: [".next/**", "node_modules/**", "coverage/**"] },
+>>>>>>> codex/create-personal-knowledge-base-system-n5lcnb
   ...compat.extends("next/core-web-vitals", "next/typescript")
 ];
 
